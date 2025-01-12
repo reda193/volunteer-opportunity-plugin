@@ -8,7 +8,6 @@
      */
      
      function volunter_admin_styles() {
-        // Only load on our plugin's admin page
             wp_enqueue_style(
                 'volunteer-admin-style',
                 plugins_url('style.css', __FILE__),
@@ -47,65 +46,11 @@
         $query = $wpdb->get_results("SELECT * FROM volunteer");
         return $query;
     }
-    function wp_volunteer_adminpage_html() {
 
-        $volunteers = get_volunteer();
-        
-        ?>
-        <div class="volunteer-body">
-            <h1 class="volunteer-header"><?php echo esc_html(get_admin_page_title()); ?></h1>
-            <div class="create-button">
-                <button>Create</button>
-            </div>
-            <table class="volunteer-table">
-                <thead class="volunteer-table-header">
-                    <tr>
-                        <th>ID</th>
-                        <th>Position</th>
-                        <th>Organization</th>
-                        <th>Type</th>
-                        <th>E-mail</th>
-                        <th>Description</th>
-                        <th>Location</th>
-                        <th>Hours</th>
-                        <th>Skills Required</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                        if ( $volunteers ) {
-                            foreach($volunteers as $volunteer) {
-                                ?>
-                                    <tr>
-                                        <td><?php echo esc_html($volunteer->volunteer_id); ?></td>
-                                        <td><?php echo esc_html($volunteer->position); ?></td>
-                                        <td><?php echo esc_html($volunteer->organization); ?></td>
-                                        <td><?php echo esc_html($volunteer->type); ?></td>
-                                        <td><?php echo esc_html($volunteer->email); ?></td>
-                                        <td><?php echo esc_html($volunteer->description); ?></td>
-                                        <td><?php echo esc_html($volunteer->location); ?></td>
-                                        <td><?php echo esc_html($volunteer->hours); ?></td>
-                                        <td><?php echo esc_html($volunteer->skills_required); ?></td>
-                                        <td>
-                                            <a href="#">Edit</a>
-                                            <a href="#">Delete</a>
-                                        </td>
-                                    </tr>
-                                <?php
-                            }
-                        }
-    
-                    ?>
-                </tbody>
-            </table>
-        </div>
-        <?php
-    }
 
     function wp_volunteer_adminpage() {
         add_menu_page(
-            "Volunteer",
+            "Volunteer Admin Page",
             "Volunteer",
             "manage_options",
             "volunteer",
