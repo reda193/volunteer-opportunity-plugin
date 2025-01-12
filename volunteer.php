@@ -28,6 +28,52 @@
         $wpdb->query("DROP TABLE volunteer");
      }
 
+     function myplugin_uninstall() {
+        global $wpdb;
+        $wpdb->query("DROP TABLE volunteer");
+    }
+
+    function wp_volunteer_adminpage_html() {
+        ?>
+        <div class="volunteer-body">
+            <h1 class="volunteer-header"><?php echo esc_html(get_admin_page_title()); ?></h1>
+            <div class="create-button">
+                <button>Create</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Position</th>
+                        <th>Organization</th>
+                        <th>Type</th>
+                        <th>E-mail</th>
+                        <th>Description</th>
+                        <th>Location</th>
+                        <th>Hours</th>
+                        <th>Skills Required</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <?php
+    }
+
+    function wp_volunteer_adminpage() {
+        add_menu_page(
+            "Volunteer",
+            "Volunteer",
+            "manage_options",
+            "volunteer",
+            "wp_volunteer_adminpage_html",
+            "icon_url",
+            position: 1
+        );
+    }
+
+    add_action('admin_menu', 'wp_volunteer_adminpage');
      register_activation_hook( __FILE__,"myplugin_activate");
      register_deactivation_hook( __FILE__,"myplugin_deactivate");
+     register_uninstall_hook( __FILE__,"myplugin_uninstall");
 ?>
