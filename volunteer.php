@@ -7,11 +7,16 @@
      * 
      */
      
-     function my_theme_enqueue_scripts() {
-        wp_enqueue_style('style', get_template_directory_uri() );
-
-     }
-     add_action('wp_enqueue_scripts', 'my_theme_enqueue_scripts');
+     function volunter_admin_styles() {
+        // Only load on our plugin's admin page
+            wp_enqueue_style(
+                'volunteer-admin-style',
+                plugins_url('style.css', __FILE__),
+                array(),
+            );
+        }
+    
+    add_action('admin_enqueue_scripts', 'volunter_admin_styles');
      function myplugin_activate() {
         global $wpdb;
         $wpdb->query("CREATE TABLE volunteer (
