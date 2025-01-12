@@ -23,5 +23,11 @@
 
      }
 
+     function myplugin_deactivate() {
+        global $wpdb;
+        $wpdb->query("DROP TABLE volunteer");
+     }
+
      register_activation_hook( __FILE__,"myplugin_activate");
+     register_deactivation_hook( __FILE__,"myplugin_deactivate");
 ?>
