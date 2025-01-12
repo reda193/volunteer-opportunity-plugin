@@ -6,7 +6,12 @@
      * Version: 0.0.1
      * 
      */
+     
+     function my_theme_enqueue_scripts() {
+        wp_enqueue_style('style', get_template_directory_uri() );
 
+     }
+     add_action('wp_enqueue_scripts', 'my_theme_enqueue_scripts');
      function myplugin_activate() {
         global $wpdb;
         $wpdb->query("CREATE TABLE volunteer (
@@ -47,8 +52,8 @@
             <div class="create-button">
                 <button>Create</button>
             </div>
-            <table>
-                <thead>
+            <table class="volunteer-table">
+                <thead class="volunteer-table-header">
                     <tr>
                         <th>ID</th>
                         <th>Position</th>
