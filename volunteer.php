@@ -32,8 +32,15 @@
         global $wpdb;
         $wpdb->query("DROP TABLE volunteer");
     }
-
+    function get_volunteer() {
+        global $wpdb;
+        $query = $wpdb->get_results("SELECT * FROM volunteer");
+        return $query;
+    }
     function wp_volunteer_adminpage_html() {
+
+        $volunteers = get_volunteer();
+        
         ?>
         <div class="volunteer-body">
             <h1 class="volunteer-header"><?php echo esc_html(get_admin_page_title()); ?></h1>
@@ -55,6 +62,32 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
+                <tbody>
+                    <?php
+                        if ( $volunteers ) {
+                            foreach($volunteers as $volunteer) {
+                                ?>
+                                    <tr>
+                                        <td><?php echo esc_html($volunteer->volunteer_id); ?></td>
+                                        <td><?php echo esc_html($volunteer->position); ?></td>
+                                        <td><?php echo esc_html($volunteer->organization); ?></td>
+                                        <td><?php echo esc_html($volunteer->type); ?></td>
+                                        <td><?php echo esc_html($volunteer->email); ?></td>
+                                        <td><?php echo esc_html($volunteer->description); ?></td>
+                                        <td><?php echo esc_html($volunteer->location); ?></td>
+                                        <td><?php echo esc_html($volunteer->hours); ?></td>
+                                        <td><?php echo esc_html($volunteer->skills_required); ?></td>
+                                        <td>
+                                            <a href="#">Edit</a>
+                                            <a href="#">Delete</a>
+                                        </td>
+                                    </tr>
+                                <?php
+                            }
+                        }
+    
+                    ?>
+                </tbody>
             </table>
         </div>
         <?php
