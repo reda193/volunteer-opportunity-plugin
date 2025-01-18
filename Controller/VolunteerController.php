@@ -9,7 +9,12 @@ class VolunteerController {
         $this->view = new VolunteerView();
 
         add_action('wp_ajax_update_volunteer', array($this, 'handleUpdateAjax'));
-        add_action('wp_ajax_delete_volunteer', callback: array($this, 'handleDeleteAjax'));
+        add_action('wp_ajax_delete_volunteer', array($this, 'handleDeleteAjax'));
+        add_action('wp_ajax_create_volunteer', array($this, 'handleCreateAjax'));
+
+    }
+    public function displayCreateForm() {
+        $this->view->displayCreateForm();
     }
     public function displayAdminPage() {
         $volunteers = $this->getAllVolunteers();
@@ -44,6 +49,30 @@ class VolunteerController {
             wp_send_json_error('Update failed: ' . $this->wpdb->last_error);
         }
     }
+
+    public function handleCreateAjax() {
+        check_ajax_referer('volunteerCreateNonce', 'nonce');
+    
+        $data = array(
+            'position' => isset($_POST['position']) ? sanitize_text_field($_POST['position']) : '',
+            'organization' => isset($_POST['organization']) ? sanitize_text_field($_POST['organization']) : '',
+            'type' => isset($_POST['type']) ? sanitize_text_field($_POST['type']) : '',
+            'email' => isset($_POST['email']) ? sanitize_email($_POST['email']) : '',
+            'description' => isset($_POST['description']) ? sanitize_textarea_field($_POST['description']) : '',
+            'location' => isset($_POST['location']) ? sanitize_text_field($_POST['location']) : '',
+            'hours' => isset($_POST['hours']) ? intval($_POST['hours']) : 0,
+            'skills_required' => isset($_POST['skills_required']) ? sanitize_textarea_field($_POST['skills_required']) : ''
+        );
+    
+        $result = $this->createVolunteer($data);
+    
+        if ($result !== false) {
+            wp_send_json_success('Volunteer created successfully');
+        } else {
+            wp_send_json_error('Create failed: ' . $this->wpdb->last_error);
+        }
+    }
+    
 
     public function handleDeleteAjax() {
         check_ajax_referer('volunteerUpdateNonce', 'nonce');

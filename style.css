@@ -7,6 +7,7 @@
     border-bottom: 2px solid black;
     padding-bottom: 10px;
 }
+
 .create-button {
     margin-bottom: 20px;
 }
@@ -26,6 +27,7 @@
 .create-button .button:hover {
     background-color: #135e96;
 }
+
 .volunteer-table {
     width: 100%;
     border-collapse: collapse;
@@ -63,25 +65,6 @@
     vertical-align: middle;
 }
 
-.volunter-table-body td a {
-    text-decoration: none;
-    color: #2271b1;
-    margin-right: 8px;
-    padding: 2px 5px;
-}
-
-.volunter-table-body td a:hover {
-    color: #135e96;
-}
-
-.volunter-table-body td a:last-child {
-    color: #d63638;
-}
-
-.volunter-table-body td a:last-child:hover {
-    color: #b32d2e;
-}
-
 @media screen and (max-width: 1200px) {
     .table-container {
         width: 100%;
@@ -93,153 +76,63 @@
     }
 }
 
-.volunteer-container {
-    margin: 2rem 0;
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-
-.volunteer-shortcode-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    margin: 1.5rem 0;
+.volunteer-form {
+    max-width: 600px;
+    margin: 20px auto;
     background: white;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
-.volunteer-shortcode-table th {
-    background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
-    font-weight: 700;
-    text-align: left;
-    padding: 1.25rem 1rem;
-    border-bottom: 2px solid #e2e8f0;
-    color: #1e293b;
-    font-size: 0.95rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    position: relative;
+.volunteer-form .form-group {
+    margin-bottom: 12px;
 }
 
-.volunteer-shortcode-table th:after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: #3b82f6;
-    transform: scaleX(0);
-    transition: transform 0.2s ease;
-}
-
-.volunteer-shortcode-table th:hover:after {
-    transform: scaleX(1);
-}
-
-.volunteer-shortcode-table td {
-    padding: 1.25rem 1rem;
-    border-bottom: 1px solid #e2e8f0;
-    vertical-align: top;
-    line-height: 1.6;
-    color: #334155;
-}
-
-.volunteer-shortcode-table tr:last-child td {
-    border-bottom: none;
-}
-
-.volunteer-shortcode-table tr:hover {
-    background-color: #f8fafc;
-    transition: background-color 0.2s ease;
-}
-
-.volunteer-title {
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: #1e293b;
-    margin-bottom: 0.5rem;
-}
-
-.volunteer-org {
-    font-weight: 600;
-    color: #475569;
-}
-
-.volunteer-type {
-    display: inline-block;
-    padding: 0.375rem 1rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-transform: capitalize;
-}
-
-.volunteer-type[data-type="one-time"] {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-.volunteer-type[data-type="recurring"] {
-    background-color: #e0e7ff;
-    color: #3730a3;
-}
-
-.volunteer-type[data-type="seasonal"] {
-    background-color: #fef3c7;
-    color: #92400e;
-}
-
-.volunteer-hours {
-    font-weight: 600;
-    color: #475569;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.volunteer-hours:before {
-    content: '⏱';
-    font-size: 1.1em;
-}
-
-.volunteer-contact {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #2563eb;
-    text-decoration: none;
+.volunteer-form label {
+    display: block;
+    margin-bottom: 5px;
     font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    transition: all 0.2s ease;
+    color: #2c3338;
+    font-size: 13px;
 }
 
-.volunteer-contact:hover {
-    background-color: #eff6ff;
-    color: #1d4ed8;
-    text-decoration: none;
+.volunteer-form input[type="text"],
+.volunteer-form input[type="email"],
+.volunteer-form input[type="number"],
+.volunteer-form select,
+.volunteer-form textarea {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #8c8f94;
+    border-radius: 3px;
+    font-size: 13px;
+    line-height: 1.4;
 }
 
-.volunteer-description {
-    color: #475569;
-    line-height: 1.6;
-    font-size: 0.95rem;
+.volunteer-form textarea {
+    min-height: 80px;
+    resize: vertical;
 }
 
-.volunteer-skills {
-    color: #64748b;
-    font-size: 0.95rem;
-    line-height: 1.5;
+.volunteer-form .button {
+    background-color: #2271b1;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 8px 15px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 10px;
 }
 
-.volunteer-location {
-    color: #475569;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 500;
+.volunteer-form .button:hover {
+    background-color: #185e9e;
 }
 
+@media screen and (max-width: 500px) {
+    .volunteer-form {
+        margin: 10px;
+        padding: 15px;
+    }
+}

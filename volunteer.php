@@ -23,14 +23,17 @@ add_action('admin_enqueue_scripts', 'volunterAdminStyles');
 
  $controller = new VolunteerController();
 
+ 
+
  function add_volunteer_menu() {
     add_menu_page(
         'Volunteer Opportunities', 
         'Volunteers',             
         'manage_options',         
-        'volunteer-list',        
-        'displayVolunterPage', 
-        'dashicons-groups',      
+        'volunteer',        
+        'volunteer_page_router', 
+        'dashicons-groups',    
+        1  
     );
 }
 
@@ -40,6 +43,17 @@ add_action('admin_enqueue_scripts', 'volunterAdminStyles');
     $controller->displayAdminPage();
 }
 
+function volunteer_page_router() {
+    global $controller;
+    $page = isset($_GET['page']) ? $_GET['page'] : '';
+    $action = isset($_GET['action']) ? $_GET['action'] : '';
+
+    if ($page === 'volunteer' && $action === 'create') {
+        $controller->displayCreateForm(); 
+    } else {
+        $controller->displayAdminPage();
+    }
+}
 add_action('admin_menu', 'add_volunteer_menu');
 
 register_activation_hook(__FILE__, function() {

@@ -163,7 +163,7 @@ class VolunteerView {
                         url: ajaxurl,
                         type: 'POST',
                         data: {
-                            action: 'deleteVolunteer',
+                            action: 'delete_volunteer',
                             nonce: nonce,
                             id: id
                         },
@@ -183,6 +183,90 @@ class VolunteerView {
                         }
                     });
                 };
+            });
+        </script>
+        <?php
+    }
+
+    public function displayCreateForm() {
+        wp_nonce_field('volunteerCreateNonce', 'volunteerNonce');
+        ?>
+        <div class="volunteer-form">
+            <h1 class="volunteer-header">Create Volunteer</h1>
+            <form id="volunteer-create-form">
+                <div class="form-group">
+                    <label for="position">Position:</label>
+                    <input type="text" id="position" name="position" required>
+                </div>
+                <div class="form-group">
+                    <label for="organization">Organization:</label>
+                    <input type="text" id="organization" name="organization" required>
+                </div>
+                <div class="form-group">
+                    <label for="type">Type:</label>
+                    <select id="type" name="type" required>
+                        <option value="one-time">One-time</option>
+                        <option value="recurring">Recurring</option>
+                        <option value="seasonal">Seasonal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location" required>
+                </div>
+                <div class="form-group">
+                    <label for="hours">Hours:</label>
+                    <input type="number" id="hours" name="hours" required>
+                </div>
+                <div class="form-group">
+                    <label for="skills_required">Skills Required:</label>
+                    <textarea id="skills_required" name="skills_required"></textarea>
+                </div>
+                <button type="submit" class="button">Save Volunteer</button>
+            </form>
+        </div>
+
+        <script>
+            jQuery(document).ready(function($) {
+                $('#volunteer-create-form').on('submit', function(e) {
+                    e.preventDefault();
+
+                    const formData = {
+                        action: 'create_volunteer',
+                        nonce: $('#volunteerNonce').val(),
+                    };
+
+                    $(this).find('input, select, textarea').each(function() {
+                        formData[$(this).attr('name')] = $(this).val();
+                    });
+
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: formData,
+                        success: function(response) {
+                            if (response.success) {
+                                alert('Volunteer created successfully!');
+                                window.location.href = '<?php echo admin_url('admin.php?page=volunteer'); ?>';
+                            } else {
+                                alert('Error creating volunteer: ' + (response.data || 'Unknown error'));
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX Error:', status, error);
+                            console.error('Response:', xhr.responseText);
+                            alert('Error creating volunteer. Check console for details.');
+                        }
+                    });
+                });
             });
         </script>
         <?php
