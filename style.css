@@ -243,36 +243,3 @@
     font-weight: 500;
 }
 
-.volunteer-location:before {
-    content: '📍';
-}
-
-.volunteer-empty {
-    padding: 4rem 2rem;
-    text-align: center;
-    background: #f8fafc;
-    border-radius: 12px;
-    border: 2px dashed #e2e8f0;
-    color: #64748b;
-    font-weight: 500;
-    font-size: 1.1rem;
-}
-
-@media (max-width: 768px) {
-    .volunteer-shortcode-table {
-        display: block;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        border-radius: 8px;
-    }
-    
-    .volunteer-shortcode-table th,
-    .volunteer-shortcode-table td {
-        padding: 1rem 0.875rem;
-        font-size: 0.9rem;
-    }
-    
-    .volunteer-title {
-        font-size: 1rem;
-    }
-}

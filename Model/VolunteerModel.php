@@ -9,7 +9,7 @@ class VolunterModel {
             volunteer_id int AUTO_INCREMENT PRIMARY KEY,
             position varchar(255) NOT NULL,
             organization varchar(255) NOT NULL,
-            type ENUM('one-time', 'recurring', 'seasonal') NOT NULL,
+            type ENUM('One-Time', 'Recurring', 'Seasonal') NOT NULL,
             email varchar(255) NOT NULL,
             description varchar(255) NOT NULL,
             location varchar(255),
@@ -18,7 +18,8 @@ class VolunterModel {
             );");
     }
 
-    public function delete_table() {
+    public function deleteTable() {
         $this->wpdb->query("DROP TABLE volunteer");
     }
+
 }
