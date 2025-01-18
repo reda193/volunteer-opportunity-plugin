@@ -25,12 +25,12 @@ add_action('admin_enqueue_scripts', 'volunterAdminStyles');
 
  function add_volunteer_menu() {
     add_menu_page(
-        'Volunteer Opportunities', // Page title
-        'Volunteers',             // Menu title
-        'manage_options',         // Capability required
-        'volunteer-list',         // Menu slug
-        'displayVolunterPage', // Function to display the page
-        'dashicons-groups',       // Icon
+        'Volunteer Opportunities', 
+        'Volunteers',             
+        'manage_options',         
+        'volunteer-list',        
+        'displayVolunterPage', 
+        'dashicons-groups',      
     );
 }
 

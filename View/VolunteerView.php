@@ -1,6 +1,7 @@
 <?php
 class VolunteerView {
-    public function display_table($volunteers) {
+    public function displayAdminTable($volunteers) {
+        wp_nonce_field('volunteerUpdateNonce', 'volunteerNonce');
         ?>
         <div class="volunteer-body">
             <h1 class="volunteer-header"><?php echo esc_html(get_admin_page_title()); ?></h1>
@@ -62,7 +63,7 @@ class VolunteerView {
                                         <button class="save-row button" 
                                                 style="display:none;" 
                                                 onclick="saveRow(<?php echo $volunteer['volunteer_id']; ?>)">
-                                            Save
+                                                Save
                                         </button>
                                         <button class="delete-row button" 
                                                 onclick="deleteVolunteer(<?php echo $volunteer['volunteer_id']; ?>)">
@@ -74,12 +75,116 @@ class VolunteerView {
                         <?php endif; ?>
                     </tbody>
                 </table>
-
-                <?php wp_nonce_field('volunteer_delete_nonce', 'volunteer_delete_nonce'); ?>
             </div>
         </div>
 
-        
+        <script>
+            jQuery(document).ready(function($) {
+                window.makeRowEditable = function(id) {
+                    const row = document.getElementById('row-' + id);
+                    const editableCells = row.getElementsByClassName('editable-cell');
+                    
+                    for (let cell of editableCells) {
+                        const currentValue = cell.textContent.trim();
+                        const field = cell.getAttribute('data-field');
+                        
+                        if (field === 'type') {
+                            cell.innerHTML = `
+                                <select>
+                                    <option value="one-time" ${currentValue === 'one-time' ? 'selected' : ''}>One-time</option>
+                                    <option value="recurring" ${currentValue === 'recurring' ? 'selected' : ''}>Recurring</option>
+                                    <option value="seasonal" ${currentValue === 'seasonal' ? 'selected' : ''}>Seasonal</option>
+                                </select>
+                            `;
+                        } else if (field === 'description' || field === 'skills_required') {
+                            cell.innerHTML = `<textarea>${currentValue}</textarea>`;
+                        } else {
+                            cell.innerHTML = `<input type="text" value="${currentValue}">`;
+                        }
+                    }
+                    
+                    row.querySelector('.edit-row').style.display = 'none';
+                    row.querySelector('.save-row').style.display = 'inline-block';
+                };
+
+                window.saveRow = function(id) {
+                    const row = document.getElementById('row-' + id);
+                    const nonce = document.getElementById('volunteerNonce').value;
+                    
+                    const data = {
+                        action: 'update_volunteer',
+                        nonce: nonce,
+                        id: id
+                    };
+                    
+                    row.querySelectorAll('.editable-cell').forEach(cell => {
+                        const field = cell.getAttribute('data-field');
+                        const input = cell.querySelector('input, select, textarea');
+                        data[field] = input.value;
+                    });
+
+                    console.log('Sending data:', data);
+                    
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: data,
+                        success: function(response) {
+                            console.log('Response:', response);
+                            if (response.success) {
+                                row.querySelectorAll('.editable-cell').forEach(cell => {
+                                    const input = cell.querySelector('input, select, textarea');
+                                    cell.textContent = input.value;
+                                });
+                                
+                                row.querySelector('.edit-row').style.display = 'inline-block';
+                                row.querySelector('.save-row').style.display = 'none';
+                                
+                                alert('Changes saved successfully!');
+                            } else {
+                                alert('Error saving changes: ' + (response.data || 'Unknown error'));
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX Error:', status, error);
+                            console.error('Response:', xhr.responseText);
+                            alert('Error saving changes. Check console for details.');
+                        }
+                    });
+                };
+
+                window.deleteVolunteer = function(id) {
+                    if (!confirm('Are you sure you want to delete this volunteer record?')) {
+                        return;
+                    }
+                    const nonce = document.getElementById('volunteerNonce').value;
+                    
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'deleteVolunteer',
+                            nonce: nonce,
+                            id: id
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                const row = document.getElementById('row-' + id);
+                                row.remove();
+                                alert('Record deleted successfully!');
+                            } else {
+                                alert('Error deleting record: ' + (response.data || 'Unknown error'));
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX Error:', status, error);
+                            console.error('Response:', xhr.responseText);
+                            alert('Error deleting record. Check console for details.');
+                        }
+                    });
+                };
+            });
+        </script>
         <?php
     }
 }
