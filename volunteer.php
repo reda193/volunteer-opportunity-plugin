@@ -92,7 +92,7 @@
                             foreach($volunteers as $volunteer) {
                                 ?>
                                 <tr class="volunter-table-body-tr" id="row-<?php echo $volunteer->volunteer_id; ?>">
-                                    <td><input type="checkbox" id="volunteer-<?php echo $volunteer->volunteer_id; ?>" name="volunteer[]" value="<?php echo $volunteer->volunteer_id; ?>">
+                                    <td>
                                         <?php echo esc_html($volunteer->volunteer_id); ?>
                                     </td>
                                     <td class="editable-cell" data-field="position"><?php echo esc_html($volunteer->position); ?></td>
