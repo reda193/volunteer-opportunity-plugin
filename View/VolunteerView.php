@@ -9,7 +9,7 @@ class VolunteerView {
             <div class="create-button">
                 <a href="<?php echo admin_url('admin.php?page=volunteer&action=create'); ?>" class="button">Create</a>
             </div>
-
+            
             <div class="table-container">
                 <table class="volunteer-table">
                     <thead class="volunteer-table-header">
@@ -28,9 +28,14 @@ class VolunteerView {
                     </thead>
                     <tbody class="volunter-table-body">
                         <?php if ($volunteers): ?>
-                            <?php foreach($volunteers as $volunteer): ?>
-                                <tr class="volunter-table-body-tr" id="row-<?php echo $volunteer['volunteer_id']; ?>">
-                                    <td><?php echo esc_html($volunteer['volunteer_id']); ?></td>
+                            <?php 
+                            $displayId = 1; 
+                            foreach($volunteers as $volunteer): 
+                            ?>
+                                <tr class="volunteer-table-body-tr"
+                                    id="row-<?php echo $displayId; ?>" 
+                                    data-original-id="<?php echo $volunteer['volunteer_id']; ?>">
+                                    <td><?php echo $displayId; ?></td> 
                                     <td class="editable-cell" data-field="position">
                                         <?php echo esc_html($volunteer['position']); ?>
                                     </td>
@@ -58,7 +63,7 @@ class VolunteerView {
                                     <td>
                                         <button class="edit-row button" 
                                                 onclick="makeRowEditable(<?php echo $volunteer['volunteer_id']; ?>)">
-                                            Edit
+                                                Edit
                                         </button>
                                         <button class="save-row button" 
                                                 style="display:none;" 
@@ -71,7 +76,9 @@ class VolunteerView {
                                         </button>
                                     </td>
                                 </tr>
-                            <?php endforeach; ?>
+                            <?php 
+                            $displayId++;
+                            endforeach; ?>
                         <?php endif; ?>
                     </tbody>
                 </table>
