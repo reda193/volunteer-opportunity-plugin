@@ -22,4 +22,6 @@ class VolunterModel {
         $this->wpdb->query("DROP TABLE volunteer");
     }
 
+
+
 }

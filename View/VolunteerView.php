@@ -301,4 +301,61 @@ class VolunteerView {
         </script>
         <?php
     }
+
+    public function displayShortcodeContent($volunteers, $atts) {
+        ob_start();
+        ?>
+        <table class="volunteer-table">
+            <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>Organization</th>
+                    <th>Type</th>
+                    <th>Email</th>
+                    <th>Description</th>
+                    <th>Location</th>
+                    <th>Hours</th>
+                    <th>Skills Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                if ($volunteers) {
+                    foreach ($volunteers as $volunteer) {
+                        $hours = intval($volunteer['hours']);
+                        $row_class = $this->getRowClass($hours, $atts);
+                        ?>
+                        <tr class="<?php echo esc_attr($row_class); ?>">
+                            <td class="volunteer-position"><?php echo esc_html($volunteer['position']); ?></td>
+                            <td class="volunteer-organization"><?php echo esc_html($volunteer['organization']); ?></td>
+                            <td class="volunteer-type"><?php echo esc_html($volunteer['type']); ?></td>
+                            <td><a href="mailto:<?php echo esc_attr($volunteer['email']); ?>"><?php echo esc_html($volunteer['email']); ?></a></td>
+                            <td><?php echo esc_html($volunteer['description']); ?></td>
+                            <td><?php echo esc_html($volunteer['location']); ?></td>
+                            <td class="volunteer-hours"><?php echo esc_html($volunteer['hours']); ?></td>
+                            <td class="volunteer-skills"><?php echo esc_html($volunteer['skills_required']); ?></td>
+                        </tr>
+                        <?php
+                    }
+                }
+                ?>
+            </tbody>
+        </table>
+        <?php
+        return ob_get_clean();
+    }
+
+    private function getRowClass($hours, $atts) {
+        if (empty($atts['hours']) && empty($atts['type'])) {
+            if ($hours < 10) {
+                return 'hours-low';
+            } elseif ($hours <= 100) {
+                return 'hours-medium';
+            } else {
+                return 'hours-high';
+            }
+        }
+        return '';
+    }
+
 }

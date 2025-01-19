@@ -54,6 +54,22 @@ function volunteer_page_router() {
         $controller->displayAdminPage();
     }
 }
+
+function volunteer_enqueue_styles() {
+    wp_enqueue_style(
+        'volunteer-shortcode-styles',
+        plugins_url('volunteer-styles.css', __FILE__),
+        array(),
+    );
+}
+add_action('wp_enqueue_scripts', 'volunteer_enqueue_styles');
+
+function volunteer_shortcode($atts) {
+    global $controller;
+    return $controller->handleShortcode($atts);
+}
+add_shortcode('volunteer', 'volunteer_shortcode');
+
 add_action('admin_menu', 'add_volunteer_menu');
 
 register_activation_hook(__FILE__, function() {

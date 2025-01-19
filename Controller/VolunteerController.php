@@ -6,6 +6,7 @@ class VolunteerController {
     public function __construct() {
         global $wpdb;
         $this->wpdb = $wpdb;
+        $this->model = new VolunterModel();
         $this->view = new VolunteerView();
 
         add_action('wp_ajax_update_volunteer', array($this, 'handleUpdateAjax'));
@@ -103,6 +104,41 @@ class VolunteerController {
         );
     }
 
+    public function handleShortcode($atts) {
+        $atts = shortcode_atts(array(
+            'hours' => null,
+            'type' => null
+        ), $atts, 'volunteer');
+
+        $volunteers = $this->getVolunteersWithFilters($atts);
+        return $this->view->displayShortcodeContent($volunteers, $atts);
+    }
+
+    private function getVolunteersWithFilters($atts) {
+        global $wpdb;
+        $table_name = 'volunteer';
+        
+        $sql = "SELECT * FROM $table_name";
+        $where_clauses = array();
+        $values = array();
+
+        if (isset($atts['hours']) && !empty($atts['hours'])) {
+            $where_clauses[] = "hours < %d";
+            $values[] = intval($atts['hours']);
+        }
+
+        if (isset($atts['type']) && !empty($atts['type'])) {
+            $where_clauses[] = "type = %s";
+            $values[] = $atts['type'];
+        }
+
+        if (!empty($where_clauses)) {
+            $sql .= " WHERE " . implode(" AND ", $where_clauses);
+            $sql = $wpdb->prepare($sql, $values);
+        }
+
+        return $wpdb->get_results($sql, ARRAY_A);
+    }
     public function createVolunteer($data) {
         return $this->wpdb->insert(
             'volunteer',
