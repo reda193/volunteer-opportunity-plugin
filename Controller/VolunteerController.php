@@ -1,12 +1,23 @@
 <?php
+/**
+ * Controller class for volunteers
+ * 
+ * Serves as the controller fot hte plugin, handles CRUD operations, and AJAX requests
+ * 
+ */
 class VolunteerController {
     private $wpdb;
     private $view;
 
+    /**
+     * Intalize constructor and set up the hooks for Wordpress
+     * 
+     * Sets up database connection, instiaties model and view objects, and registers AJAX handlers for admin operations
+     */
     public function __construct() {
         global $wpdb;
         $this->wpdb = $wpdb;
-        $this->model = new VolunterModel();
+        $this->model = new VolunteerModel();
         $this->view = new VolunteerView();
 
         add_action('wp_ajax_update_volunteer', array($this, 'handleUpdateAjax'));
@@ -14,23 +25,37 @@ class VolunteerController {
         add_action('wp_ajax_create_volunteer', array($this, 'handleCreateAjax'));
 
     }
+    /**
+     * Displays the create form from the view
+     * @return void
+     */
     public function displayCreateForm() {
         $this->view->displayCreateForm();
     }
+    /**
+     * Displays the admin page from the view
+     * @return void
+     */
     public function displayAdminPage() {
         $volunteers = $this->getAllVolunteers();
         $this->view->displayAdminTable($volunteers);
     }
+    /**
+     * Handles AJAX requests for updating volunteer records, validates the nonce, sanitizes input data, and updates the database reocrd, sends JSON response based on success or failure.
+     * @return void
+     */
     public function handleUpdateAjax() {
+        # Verify the nonce
         check_ajax_referer('volunteerUpdateNonce', 'nonce');
-
-        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
         
+        # Validate the ID (Ternary operator)
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
         if (!$id) {
             wp_send_json_error('Invalid ID');
             return;
         }
 
+        # Sanitizes the input data
         $data = array(
             'position' => isset($_POST['position']) ? sanitize_text_field($_POST['position']) : '',
             'organization' => isset($_POST['organization']) ? sanitize_text_field($_POST['organization']) : '',
@@ -42,6 +67,7 @@ class VolunteerController {
             'skills_required' => isset($_POST['skills_required']) ? sanitize_textarea_field($_POST['skills_required']) : ''
         );
 
+        # Attempt update and send response based on the JSON response
         $result = $this->updateVolunteer($id, $data);
 
         if ($result !== false) {
@@ -51,6 +77,11 @@ class VolunteerController {
         }
     }
 
+    /**
+     * Hnadles AJX request for creating new volunteer records / Same principles and logic as updating
+     * 
+     * @return void
+     */
     public function handleCreateAjax() {
         check_ajax_referer('volunteerCreateNonce', 'nonce');
     
@@ -74,7 +105,11 @@ class VolunteerController {
         }
     }
     
-
+    /**
+     * Hnadles AJX request for deleting new volunteer records / Same principles and logic as updating
+     * 
+     * @return void
+     */
     public function handleDeleteAjax() {
         check_ajax_referer('volunteerUpdateNonce', 'nonce');
 
@@ -94,9 +129,19 @@ class VolunteerController {
         }
     }
 
+    /**
+     * 
+     * Gets all volunteers in the table
+     * @return array|object|null
+     */
     public function getAllVolunteers() {
         return $this->wpdb->get_results("SELECT * FROM volunteer", ARRAY_A);
     }
+    /**
+     * Getys all volunteers in the table based on ID
+     * @param mixed $id ID of the vvolunteer
+     * @return array|object|null
+     */
     public function getVolunteerById($id) {
         return $this->wpdb->get_row(
             $this->wpdb->prepare("SELECT * FROM volunteer WHERE volunteer_id = %d", $id),
@@ -104,6 +149,11 @@ class VolunteerController {
         );
     }
 
+    /**
+     * Process shortcode attributes and returns rendered content from the view calling displayShortcodeContent
+     * @param mixed $atts Shortcode attribute
+     * @return bool|string The HTML from the VIEW
+     */
     public function handleShortcode($atts) {
         $atts = shortcode_atts(array(
             'hours' => null,
@@ -114,24 +164,35 @@ class VolunteerController {
         return $this->view->displayShortcodeContent($volunteers, $atts);
     }
 
+    /**
+     * Retrieves volunteer records based on the filter
+     * 
+     * Executes SQL based on the provided filter, for hours and type
+     * @param mixed $atts
+     * @return array|object|null
+     */
     private function getVolunteersWithFilters($atts) {
         global $wpdb;
+    
         $table_name = 'volunteer';
         
+        # Base Query
         $sql = "SELECT * FROM $table_name";
         $where_clauses = array();
         $values = array();
 
+        # Add hours if in attributes
         if (isset($atts['hours']) && !empty($atts['hours'])) {
             $where_clauses[] = "hours < %d";
             $values[] = intval($atts['hours']);
         }
-
+        # Add type if in attributes
         if (isset($atts['type']) && !empty($atts['type'])) {
             $where_clauses[] = "type = %s";
             $values[] = $atts['type'];
         }
 
+        # Construct the final query
         if (!empty($where_clauses)) {
             $sql .= " WHERE " . implode(" AND ", $where_clauses);
             $sql = $wpdb->prepare($sql, $values);
@@ -139,6 +200,12 @@ class VolunteerController {
 
         return $wpdb->get_results($sql, ARRAY_A);
     }
+    
+    /**
+     * Creates a volunteer
+     * @param mixed $data
+     * @return bool|int
+     */
     public function createVolunteer($data) {
         return $this->wpdb->insert(
             'volunteer',
@@ -156,6 +223,12 @@ class VolunteerController {
         );
     }
 
+    /**
+     * Updates a volunteer
+     * @param mixed $id
+     * @param mixed $data
+     * @return bool|int
+     */
     public function updateVolunteer($id, $data) {
         return $this->wpdb->update(
             'volunteer',
@@ -175,6 +248,11 @@ class VolunteerController {
         );
     }
 
+    /**
+     * Deletes a volunteer
+     * @param mixed $id
+     * @return bool|int
+     */
     public function deleteVolunteer($id) {
         return $this->wpdb->delete(
             'volunteer',

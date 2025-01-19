@@ -1,6 +1,18 @@
 <?php
+/**
+ * View class for rendering volunteer opportunities
+ * 
+ * Handles HTML output and JavaScript functionality, shortcode, table, and forms.
+ */
 class VolunteerView {
+    /**
+     * Displays the admin table with all volunteer opprtunities
+     * Inclides functionaltiy for inline editing and deleting
+     * @param mixed $volunteers
+     * @return void
+     */
     public function displayAdminTable($volunteers) {
+        # Generates nonce
         wp_nonce_field('volunteerUpdateNonce', 'volunteerNonce');
         ?>
         <div class="volunteer-body">
@@ -9,7 +21,7 @@ class VolunteerView {
             <div class="create-button">
                 <a href="<?php echo admin_url('admin.php?page=volunteer&action=create'); ?>" class="button">Create</a>
             </div>
-            
+            <!-- Table Container -->
             <div class="table-container">
                 <table class="volunteer-table">
                     <thead class="volunteer-table-header">
@@ -26,12 +38,15 @@ class VolunteerView {
                             <th>Actions</th>
                         </tr>
                     </thead>
+                    <!-- Table Body Container -->
                     <tbody class="volunter-table-body">
                         <?php if ($volunteers): ?>
                             <?php 
+                            # Creates display ID country
                             $displayId = 1; 
                             foreach($volunteers as $volunteer): 
-                            ?>
+                            ?>  
+                                <!-- Table rows iwth data attributes for JavaScript functionality -->
                                 <tr class="volunteer-table-body-tr"
                                     id="row-<?php echo $displayId; ?>" 
                                     data-original-id="<?php echo $volunteer['volunteer_id']; ?>">
@@ -60,14 +75,15 @@ class VolunteerView {
                                     <td class="editable-cell" data-field="skills_required">
                                         <?php echo esc_html($volunteer['skills_required']); ?>
                                     </td>
+                                    <!-- Action Buttons -->
                                     <td>
                                         <button class="edit-row button" 
-                                                onclick="makeRowEditable(<?php echo $volunteer['volunteer_id']; ?>)">
-                                                Edit
+                                                onclick="makeRowEditable(<?php echo $displayId; ?>)">
+                                            Edit
                                         </button>
                                         <button class="save-row button" 
                                                 style="display:none;" 
-                                                onclick="saveRow(<?php echo $volunteer['volunteer_id']; ?>)">
+                                                onclick="saveRow(<?php echo $displayId; ?>)">
                                                 Save
                                         </button>
                                         <button class="delete-row button" 
@@ -87,14 +103,19 @@ class VolunteerView {
 
         <script>
             jQuery(document).ready(function($) {
+                /**
+                 * Makes row editable converting cells to input fields.
+                 */
                 window.makeRowEditable = function(id) {
                     const row = document.getElementById('row-' + id);
                     const editableCells = row.getElementsByClassName('editable-cell');
                     
+                    // Converts eahc cell to its input field
                     for (let cell of editableCells) {
                         const currentValue = cell.textContent.trim();
                         const field = cell.getAttribute('data-field');
                         
+                        // Logic for differnet field types
                         if (field === 'type') {
                             cell.innerHTML = `
                                 <select>
@@ -114,16 +135,20 @@ class VolunteerView {
                     row.querySelector('.save-row').style.display = 'inline-block';
                 };
 
+                /**
+                 * Saves the edited row through AJAX
+                 */
                 window.saveRow = function(id) {
                     const row = document.getElementById('row-' + id);
                     const nonce = document.getElementById('volunteerNonce').value;
                     
+                    // Preparing data for request
                     const data = {
                         action: 'update_volunteer',
                         nonce: nonce,
                         id: id
                     };
-                    
+                    // Collects value from the editable cells (input fields)
                     row.querySelectorAll('.editable-cell').forEach(cell => {
                         const field = cell.getAttribute('data-field');
                         const input = cell.querySelector('input, select, textarea');
@@ -131,7 +156,7 @@ class VolunteerView {
                     });
 
                     console.log('Sending data:', data);
-                    
+                    // Sends request
                     $.ajax({
                         url: ajaxurl,
                         type: 'POST',
@@ -159,13 +184,16 @@ class VolunteerView {
                         }
                     });
                 };
-
+                /**
+                 * Deletes volunteer record based on ID, and updates the table
+                 */
                 window.deleteVolunteer = function(id) {
                     if (!confirm('Are you sure you want to delete this volunteer record?')) {
                         return;
                     }
                     const nonce = document.getElementById('volunteerNonce').value;
                     
+                    // Sends delete request
                     $.ajax({
                         url: ajaxurl,
                         type: 'POST',
@@ -218,7 +246,12 @@ class VolunteerView {
         <?php
     }
 
+    /**
+     * Displays the creare form
+     * @return void
+     */
     public function displayCreateForm() {
+        // Generates nonce
         wp_nonce_field('volunteerCreateNonce', 'volunteerNonce');
         ?>
         <div class="volunteer-form">
@@ -266,18 +299,24 @@ class VolunteerView {
 
         <script>
             jQuery(document).ready(function($) {
+                /**
+                 * Handles submission through AJAX
+                 */
                 $('#volunteer-create-form').on('submit', function(e) {
                     e.preventDefault();
-
+                    
+                    // Prepares FORM DATA
                     const formData = {
                         action: 'create_volunteer',
                         nonce: $('#volunteerNonce').val(),
                     };
-
+                    
+                    // Collects form field values
                     $(this).find('input, select, textarea').each(function() {
                         formData[$(this).attr('name')] = $(this).val();
                     });
 
+                    // Sends AJAX request
                     $.ajax({
                         url: ajaxurl,
                         type: 'POST',
@@ -302,6 +341,12 @@ class VolunteerView {
         <?php
     }
 
+    /**
+     * Dispalys the shortcode content 
+     * @param mixed $volunteers
+     * @param mixed $atts
+     * @return bool|string
+     */
     public function displayShortcodeContent($volunteers, $atts) {
         ob_start();
         ?>
@@ -345,6 +390,12 @@ class VolunteerView {
         return ob_get_clean();
     }
 
+    /**
+     * Determines CSS based on hours
+     * @param mixed $hours
+     * @param mixed $atts
+     * @return string
+     */
     private function getRowClass($hours, $atts) {
         if (empty($atts['hours']) && empty($atts['type'])) {
             if ($hours < 10) {
