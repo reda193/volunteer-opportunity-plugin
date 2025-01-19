@@ -102,146 +102,224 @@ class VolunteerView {
         </div>
 
         <script>
-            jQuery(document).ready(function($) {
-                /**
-                 * Makes row editable converting cells to input fields.
-                 */
-                window.makeRowEditable = function(id) {
-                    const row = document.getElementById('row-' + id);
-                    const editableCells = row.getElementsByClassName('editable-cell');
-                    
-                    // Converts eahc cell to its input field
-                    for (let cell of editableCells) {
-                        const currentValue = cell.textContent.trim();
-                        const field = cell.getAttribute('data-field');
-                        
-                        // Logic for differnet field types
-                        if (field === 'type') {
-                            cell.innerHTML = `
-                                <select>
-                                    <option value="one-time" ${currentValue === 'one-time' ? 'selected' : ''}>One-time</option>
-                                    <option value="recurring" ${currentValue === 'recurring' ? 'selected' : ''}>Recurring</option>
-                                    <option value="seasonal" ${currentValue === 'seasonal' ? 'selected' : ''}>Seasonal</option>
-                                </select>
-                            `;
-                        } else if (field === 'description' || field === 'skills_required') {
-                            cell.innerHTML = `<textarea>${currentValue}</textarea>`;
-                        } else {
-                            cell.innerHTML = `<input type="text" value="${currentValue}">`;
-                        }
-                    }
-                    
-                    row.querySelector('.edit-row').style.display = 'none';
-                    row.querySelector('.save-row').style.display = 'inline-block';
-                };
+           jQuery(document).ready(function($) {
+    // Declare functions in global scope
+    window.makeRowEditable = function(id) {
+        const row = document.getElementById('row-' + id);
+        const editableCells = row.getElementsByClassName('editable-cell');
+        
+        for (let cell of editableCells) {
+            const currentValue = cell.textContent.trim();
+            const field = cell.getAttribute('data-field');
+            
+            if (field === 'type') {
+                cell.innerHTML = `
+                    <select>
+                        <option value="one-time" ${currentValue === 'one-time' ? 'selected' : ''}>One-time</option>
+                        <option value="recurring" ${currentValue === 'recurring' ? 'selected' : ''}>Recurring</option>
+                        <option value="seasonal" ${currentValue === 'seasonal' ? 'selected' : ''}>Seasonal</option>
+                    </select>
+                `;
+            } else if (field === 'description' || field === 'skills_required') {
+                cell.innerHTML = `<textarea>${currentValue}</textarea>`;
+            } else {
+                cell.innerHTML = `<input type="text" value="${currentValue}">`;
+            }
+        }
+        
+        row.querySelector('.edit-row').style.display = 'none';
+        row.querySelector('.save-row').style.display = 'inline-block';
+    };
 
-                /**
-                 * Saves the edited row through AJAX
-                 */
-                window.saveRow = function(id) {
-                    const row = document.getElementById('row-' + id);
-                    const nonce = document.getElementById('volunteerNonce').value;
-                    
-                    // Preparing data for request
-                    const data = {
-                        action: 'update_volunteer',
-                        nonce: nonce,
-                        id: id
-                    };
-                    // Collects value from the editable cells (input fields)
+    window.saveRow = function(displayId) {
+        const row = document.getElementById('row-' + displayId);
+        if (!row) {
+            console.error('Row not found:', displayId);
+            return;
+        }
+
+        const originalId = row.getAttribute('data-original-id');
+        if (!originalId) {
+            console.error('Original ID not found for row:', displayId);
+            return;
+        }
+
+        const nonce = document.getElementById('volunteerNonce').value;
+        
+        // Prepare data for request
+        const data = {
+            action: 'update_volunteer',
+            nonce: nonce,
+            id: originalId // Use the original database ID instead of display ID
+        };
+
+        // Collect values from editable cells
+        let hasErrors = false;
+        row.querySelectorAll('.editable-cell').forEach(cell => {
+            const field = cell.getAttribute('data-field');
+            const input = cell.querySelector('input, select, textarea');
+            
+            if (!input) {
+                console.error(`Input element not found for field: ${field}`);
+                hasErrors = true;
+                return;
+            }
+
+            // Basic validation
+            if (input.required && !input.value.trim()) {
+                alert(`${field} cannot be empty`);
+                hasErrors = true;
+                return;
+            }
+
+            if (field === 'email' && !isValidEmail(input.value)) {
+                alert('Please enter a valid email address');
+                hasErrors = true;
+                return;
+            }
+
+            if (field === 'hours' && (isNaN(input.value) || input.value < 0)) {
+                alert('Hours must be a positive number');
+                hasErrors = true;
+                return;
+            }
+
+            data[field] = input.value;
+        });
+
+        if (hasErrors) {
+            return;
+        }
+
+        // Show loading state
+        const saveButton = row.querySelector('.save-row');
+        const originalText = saveButton.textContent;
+        saveButton.textContent = 'Saving...';
+        saveButton.disabled = true;
+
+        // Send request
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: data,
+            success: function(response) {
+                if (response.success) {
+                    // Update the displayed values
                     row.querySelectorAll('.editable-cell').forEach(cell => {
-                        const field = cell.getAttribute('data-field');
                         const input = cell.querySelector('input, select, textarea');
-                        data[field] = input.value;
+                        cell.textContent = input.value;
                     });
-
-                    console.log('Sending data:', data);
-                    // Sends request
-                    $.ajax({
-                        url: ajaxurl,
-                        type: 'POST',
-                        data: data,
-                        success: function(response) {
-                            console.log('Response:', response);
-                            if (response.success) {
-                                row.querySelectorAll('.editable-cell').forEach(cell => {
-                                    const input = cell.querySelector('input, select, textarea');
-                                    cell.textContent = input.value;
-                                });
-                                
-                                row.querySelector('.edit-row').style.display = 'inline-block';
-                                row.querySelector('.save-row').style.display = 'none';
-                                
-                                alert('Changes saved successfully!');
-                            } else {
-                                alert('Error saving changes: ' + (response.data || 'Unknown error'));
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('AJAX Error:', status, error);
-                            console.error('Response:', xhr.responseText);
-                            alert('Error saving changes. Check console for details.');
-                        }
-                    });
-                };
-                /**
-                 * Deletes volunteer record based on ID, and updates the table
-                 */
-                window.deleteVolunteer = function(id) {
-                    if (!confirm('Are you sure you want to delete this volunteer record?')) {
-                        return;
-                    }
-                    const nonce = document.getElementById('volunteerNonce').value;
                     
-                    // Sends delete request
-                    $.ajax({
-                        url: ajaxurl,
-                        type: 'POST',
-                        data: {
-                            action: 'delete_volunteer',
-                            nonce: nonce,
-                            id: id
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                console.log('Attempting to remove row with original ID:', id);
-                                
-                                $('.volunteer-table-body-tr').each(function() {
-                                    console.log('Row:', $(this), 'Original ID:', $(this).attr('data-original-id'));
-                                });
+                    // Reset buttons
+                    row.querySelector('.edit-row').style.display = 'inline-block';
+                    row.querySelector('.save-row').style.display = 'none';
+                    
+                    alert('Changes saved successfully!');
+                } else {
+                    alert('Error saving changes: ' + (response.data || 'Unknown error'));
+                    console.error('Save error:', response);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+                console.error('Response:', xhr.responseText);
+                alert('Error saving changes. Please try again.');
+            },
+            complete: function() {
+                // Reset button state
+                saveButton.textContent = originalText;
+                saveButton.disabled = false;
+            }
+        });
+    };
 
-                                const row = $(`tr[data-original-id="${id}"]`);
-                                
-                                console.log('Found rows:', row.length);
-                                
-                                if (row.length) {
-                                    row.remove(); 
-                                    
-                                    $('.volunteer-table-body-tr').each(function(index) {
-                                        $(this).find('td:first-child').text(index + 1);
-                                        $(this).attr('id', 'row-' + (index + 1));
-                                        
-                                        $(this).find('.edit-row').attr('onclick', `makeRowEditable(${index + 1})`);
-                                        $(this).find('.save-row').attr('onclick', `saveRow(${index + 1})`);
-                                    });
-                                    
-                                    alert('Record deleted successfully!');
-                                } else {
-                                    console.error('Row not found for id: ' + id);
-                                    alert('Record deleted, but unable to remove from table.');
-                                }
-                            } else {
-                                alert('Error deleting record: ' + (response.data || 'Unknown error'));
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('AJAX Error:', status, error);
-                            console.error('Response:', xhr.responseText);
-                            alert('Error deleting record. Check console for details.');
-                        }
-                    });
-                };
-            });
+    window.deleteVolunteer = function(id) {
+        if (!confirm('Are you sure you want to delete this volunteer record?')) {
+            return;
+        }
+        const nonce = document.getElementById('volunteerNonce').value;
+        
+        // Send delete request
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'delete_volunteer',
+                nonce: nonce,
+                id: id
+            },
+            success: function(response) {
+                if (response.success) {
+                    const row = $(`tr[data-original-id="${id}"]`);
+                    
+                    if (row.length) {
+                        row.remove(); 
+                        
+                        // Update remaining row IDs and buttons
+                        $('.volunteer-table-body-tr').each(function(index) {
+                            const newIndex = index + 1;
+                            $(this).find('td:first-child').text(newIndex);
+                            $(this).attr('id', 'row-' + newIndex);
+                            $(this).find('.edit-row').attr('onclick', `makeRowEditable(${newIndex})`);
+                            $(this).find('.save-row').attr('onclick', `saveRow(${newIndex})`);
+                        });
+                        
+                        alert('Record deleted successfully!');
+                    } else {
+                        console.error('Row not found for id: ' + id);
+                        alert('Record deleted, but unable to remove from table.');
+                    }
+                } else {
+                    alert('Error deleting record: ' + (response.data || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+                console.error('Response:', xhr.responseText);
+                alert('Error deleting record. Check console for details.');
+            }
+        });
+    };
+
+    // Helper function to validate email
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    // Initialize any other event handlers
+    $('#volunteer-create-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            action: 'create_volunteer',
+            nonce: $('#volunteerNonce').val(),
+        };
+        
+        $(this).find('input, select, textarea').each(function() {
+            formData[$(this).attr('name')] = $(this).val();
+        });
+
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    alert('Volunteer created successfully!');
+                    window.location.href = '<?php echo admin_url('admin.php?page=volunteer'); ?>';
+                } else {
+                    alert('Error creating volunteer: ' + (response.data || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+                console.error('Response:', xhr.responseText);
+                alert('Error creating volunteer. Check console for details.');
+            }
+        });
+    });
+});
         </script>
         <?php
     }
