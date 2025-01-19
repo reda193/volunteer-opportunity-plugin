@@ -176,9 +176,32 @@ class VolunteerView {
                         },
                         success: function(response) {
                             if (response.success) {
-                                const row = document.getElementById('row-' + id);
-                                row.remove();
-                                alert('Record deleted successfully!');
+                                console.log('Attempting to remove row with original ID:', id);
+                                
+                                $('.volunteer-table-body-tr').each(function() {
+                                    console.log('Row:', $(this), 'Original ID:', $(this).attr('data-original-id'));
+                                });
+
+                                const row = $(`tr[data-original-id="${id}"]`);
+                                
+                                console.log('Found rows:', row.length);
+                                
+                                if (row.length) {
+                                    row.remove(); 
+                                    
+                                    $('.volunteer-table-body-tr').each(function(index) {
+                                        $(this).find('td:first-child').text(index + 1);
+                                        $(this).attr('id', 'row-' + (index + 1));
+                                        
+                                        $(this).find('.edit-row').attr('onclick', `makeRowEditable(${index + 1})`);
+                                        $(this).find('.save-row').attr('onclick', `saveRow(${index + 1})`);
+                                    });
+                                    
+                                    alert('Record deleted successfully!');
+                                } else {
+                                    console.error('Row not found for id: ' + id);
+                                    alert('Record deleted, but unable to remove from table.');
+                                }
                             } else {
                                 alert('Error deleting record: ' + (response.data || 'Unknown error'));
                             }
